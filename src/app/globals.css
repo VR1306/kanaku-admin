@@ -1,0 +1,294 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens — same values as the Kanaku user app so the admin reads as an extension of it.
+ * Token names keep the admin's existing utility names (canvas, ok, bad, warn, brand-soft, …).
+ */
+@theme {
+  --color-navy: #0b1220;
+  --color-navy-2: #1e40af;
+  --color-brand: #1d4ed8;
+  --color-brand-soft: #dbeafe;
+  --color-brand-pale: #bfdbfe;
+  --color-cyan: #22d3ee;
+  --color-cyan-soft: #cffafe;
+  --color-cyan-pale: #a5f3fc;
+  --color-cyan-deep: #0e7490;
+  --color-focus: var(--color-cyan);
+  --color-link: #1d4ed8;
+  --color-nav-active-bg: #f6f8fb;
+  --color-nav-active-fg: #1d4ed8;
+  --color-on-inverse: #f6f8fb;
+  --color-on-accent: #0b1220;
+  --color-canvas: #f6f8fb;
+  --color-surface: #ffffff;
+  --color-line: #e2e8f0;
+  --color-line-strong: #cbd5e1;
+  --color-line-soft: #eef2f7;
+  --color-ink: #0f172a;
+  --color-ink-2: #334155;
+  --color-muted: #64748b;
+  --color-subtle: #94a3b8;
+  --color-ok: #047857;
+  --color-ok-soft: #d1fae5;
+  --color-bad: #c20039;
+  --color-bad-soft: #ffe4e6;
+  --color-warn: #b45309;
+  --color-warn-soft: #fef3c7;
+  --color-violet: #7c3aed;
+  --color-violet-soft: #ede9fe;
+
+  --radius-control: 14px;
+  --radius-card: 28px;
+  --radius-panel: 20px;
+
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-jakarta), var(--font-inter), sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-navy: #060b16;
+  --color-brand: #2563eb;
+  --color-brand-soft: #1e3a8a;
+  --color-link: #60a5fa;
+  --color-nav-active-bg: #1e293b;
+  --color-nav-active-fg: #22d3ee;
+  --color-cyan-soft: #164e63;
+  --color-cyan-deep: #67e8f9;
+  --color-canvas: #0f172a;
+  --color-surface: #1e293b;
+  --color-line: #334155;
+  --color-line-strong: #475569;
+  --color-line-soft: #243044;
+  --color-ink: #f1f5f9;
+  --color-ink-2: #cbd5e1;
+  --color-muted: #94a3b8;
+  --color-subtle: #8493a8;
+  --color-ok: #34d399;
+  --color-ok-soft: #064e3b;
+  --color-bad: #f87171;
+  --color-bad-soft: #3b1219;
+  --color-warn: #fcd34d;
+  --color-warn-soft: #422006;
+  --color-violet: #a78bfa;
+  --color-violet-soft: #2e1f5e;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+/* Sidebar scrollbar: cyan on navy, as in the user app. */
+.scroll-primary {
+  scrollbar-color: var(--color-cyan) rgb(255 255 255 / 0.06);
+}
+.scroll-primary::-webkit-scrollbar {
+  width: 8px;
+}
+.scroll-primary::-webkit-scrollbar-track {
+  background: rgb(255 255 255 / 0.06);
+  border-radius: 999px;
+}
+.scroll-primary::-webkit-scrollbar-thumb {
+  background: var(--color-cyan);
+  border-radius: 999px;
+}
+
+/* Tailwind v4 resets buttons to the default cursor; restore the pointer for clickable things. */
+@layer base {
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  a[href],
+  summary,
+  select,
+  label[for],
+  input[type='checkbox'],
+  input[type='radio'] {
+    cursor: pointer;
+  }
+  button:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+}
+
+/* Side panel (Modal variant="drawer"). */
+dialog.drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  margin: 0;
+  padding: 0;
+  width: min(100%, var(--drawer-w, 460px));
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  border: 0;
+  box-shadow: -24px 0 60px rgb(0 0 0 / 0.18);
+}
+dialog.drawer::backdrop {
+  background: rgb(11 18 32 / 0.5);
+}
+
+/* Checkboxes/radios and file pickers share one look across every form (matches the user app's 18px accent checkbox). */
+input[type='checkbox'],
+input[type='radio'] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-brand);
+  flex-shrink: 0;
+}
+input[type='checkbox'] {
+  border-radius: 4px;
+}
+input[type='file']::file-selector-button {
+  margin-right: 12px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-link);
+  font-weight: 600;
+  cursor: pointer;
+}
+input[type='file']::file-selector-button:hover {
+  background: var(--color-canvas);
+}
+input[type='color'] {
+  padding: 3px;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 12px;
+  background: var(--color-surface);
+}
+
+/* ---- Overlays: native <dialog> with CSS enter/exit animations (see components/ui/Modal.tsx) ---- */
+dialog:not(.drawer) {
+  animation: kpop-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+dialog:not(.drawer)[data-closing] {
+  animation: kpop-out 0.18s ease-in both;
+}
+dialog.drawer {
+  animation: kslide-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+dialog.drawer[data-closing] {
+  animation: kslide-out 0.24s cubic-bezier(0.4, 0, 1, 1) both;
+}
+dialog::backdrop {
+  animation: kfade-in 0.25s ease both;
+}
+dialog[data-closing]::backdrop {
+  animation: kfade-out 0.22s ease both;
+}
+/* Page behind an open overlay must not scroll. */
+body:has(dialog[open]) {
+  overflow: hidden;
+}
+@keyframes kpop-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes kpop-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+@keyframes kslide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes kslide-out {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes kfade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes kfade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes kprogress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+@keyframes kmenu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog,
+  dialog::backdrop,
+  .animate-spin {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+body:has([data-fullscreen]) {
+  overflow: hidden;
+}

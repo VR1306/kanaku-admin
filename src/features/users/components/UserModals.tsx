@@ -1,0 +1,254 @@
+'use client';
+
+import { useState } from 'react';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Checkbox, SelectField, TextField } from '@/components/ui/Field';
+import { Modal } from '@/components/ui/Modal';
+import { useToast } from '@/components/ui/Toast';
+import { api } from '@/lib/api-client';
+import { type AppUser } from '@/types/users';
+import { addUserBody } from '../schemas/users';
+import { Choice, PLAN_OPTIONS, msg } from './modal-shared';
+
+export function AddUserModal({
+  open,
+  onClose,
+  onDone,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const { toast } = useToast();
+  const [f, setF] = useState({
+    name: '',
+    email: '',
+    phone: '+91 ',
+    plan: 'starter',
+    trial: '0',
+    send: true,
+  });
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+  const body = {
+    name: f.name,
+    email: f.email,
+    phone: f.phone.trim() === '+91' ? '' : f.phone,
+    plan: f.plan,
+    trialDays: Number(f.trial),
+    sendInvite: f.send,
+  };
+  const parsed = addUserBody.safeParse(body);
+  const fieldErr = (k: string) =>
+    (f.name || f.email) && !parsed.success
+      ? parsed.error.issues.find((i) => i.path[0] === k)?.message
+      : undefined;
+
+  async function submit() {
+    setBusy(true);
+    try {
+      const r = await api<{ inviteLink: string }>('/api/users', { body });
+      onClose();
+      onDone();
+      setErr('');
+      setF({ name: '', email: '', phone: '+91 ', plan: 'starter', trial: '0', send: true });
+      toast('User added as Invited — invite link copied');
+      navigator.clipboard?.writeText(r.inviteLink).catch(() => {});
+    } catch (e) {
+      setErr(msg(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <Modal
+      open={open}
+      variant="drawer"
+      busy={busy}
+      title="Add user"
+      subtitle="Creates an account and emails a single-use invite."
+      onClose={onClose}
+      footer={
+        <>
+          <Button variant="outline" onClick={onClose} disabled={busy}>
+            Cancel
+          </Button>
+          <Button disabled={!parsed.success} loading={busy} onClick={submit}>
+            Add user and send invite
+          </Button>
+        </>
+      }
+    >
+      <p className="rounded-2xl bg-canvas p-4 text-sm text-muted">
+        The user starts as <Badge tone="amber">Invited</Badge> and becomes{' '}
+        <Badge tone="green">Active</Badge> after setting a password and MFA.
+      </p>
+      <TextField
+        label="Full name"
+        placeholder="e.g. Priya Sharma"
+        autoComplete="off"
+        value={f.name}
+        onChange={(e) => setF({ ...f, name: e.target.value })}
+        error={fieldErr('name')}
+      />
+      <TextField
+        label="Email"
+        type="email"
+        placeholder="name@example.com"
+        autoComplete="off"
+        value={f.email}
+        onChange={(e) => setF({ ...f, email: e.target.value })}
+        error={fieldErr('email')}
+      />
+      <TextField
+        label="Phone (optional)"
+        type="tel"
+        placeholder="+91 98765 43210"
+        value={f.phone}
+        onChange={(e) => setF({ ...f, phone: e.target.value })}
+      />
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <SelectField
+          label="Plan"
+          value={f.plan}
+          onChange={(e) => setF({ ...f, plan: e.target.value })}
+          options={PLAN_OPTIONS}
+        />
+        <SelectField
+          label="Trial period"
+          value={f.trial}
+          onChange={(e) => setF({ ...f, trial: e.target.value })}
+          options={[
+            { value: '0', label: 'None' },
+            { value: '14', label: '14 days' },
+            { value: '30', label: '30 days' },
+            { value: '90', label: '90 days' },
+          ]}
+        />
+      </div>
+      <Checkbox
+        checked={f.send}
+        onChange={(e) => setF({ ...f, send: e.target.checked })}
+        label="Send invite email now (single-use link, valid 7 days)"
+      />
+      {err && (
+        <p role="alert" className="rounded-xl bg-bad-soft px-4 py-3 text-sm text-bad">
+          {err}
+        </p>
+      )}
+    </Modal>
+  );
+}
+
+export function ResetPasswordModal({
+  user,
+  onClose,
+  onDone,
+}: {
+  user: AppUser | null;
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const { toast } = useToast();
+  const [method, setMethod] = useState<'link' | 'temp'>('link');
+  const [temp, setTemp] = useState('');
+  const [signOut, setSignOut] = useState(true);
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+  const gen = () =>
+    setTemp(
+      `Kn-${crypto.randomUUID().slice(0, 4)}-${crypto.randomUUID().slice(0, 4)}-${crypto.randomUUID().slice(0, 2)}`,
+    );
+  const invalid = method === 'temp' && temp.length < 10;
+  async function submit() {
+    setBusy(true);
+    try {
+      await api(`/api/users/${user!.id}/reset-password`, {
+        body:
+          method === 'link'
+            ? { method, signOutAll: signOut }
+            : { method, tempPassword: temp, signOutAll: signOut },
+      });
+      toast(
+        method === 'link'
+          ? 'Reset link sent (valid 30 minutes)'
+          : 'Temporary password set — user must change it at next sign-in',
+      );
+      onClose();
+      onDone();
+      setTemp('');
+      setErr('');
+    } catch (e) {
+      setErr(msg(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <Modal
+      open={!!user}
+      busy={busy}
+      title="Reset password"
+      subtitle={user ? `${user.name} · ${user.email}` : undefined}
+      onClose={onClose}
+      footer={
+        <>
+          <Button variant="outline" onClick={onClose} disabled={busy}>
+            Cancel
+          </Button>
+          <Button disabled={invalid} loading={busy} onClick={submit}>
+            Reset password
+          </Button>
+        </>
+      }
+    >
+      <p className="rounded-2xl bg-canvas p-4 text-sm text-muted">
+        Last changed <b className="text-ink">{user?.lastPasswordChange ?? 'never'}</b> · MFA{' '}
+        {user?.mfa ? 'on' : 'off'}
+      </p>
+      <Choice
+        name="rp"
+        checked={method === 'link'}
+        onChange={() => setMethod('link')}
+        title="Send a reset link"
+        hint="The user gets an email link, valid for 30 minutes."
+      />
+      <Choice
+        name="rp"
+        checked={method === 'temp'}
+        onChange={() => setMethod('temp')}
+        title="Set a temporary password"
+        hint="The user must change it at their next sign-in."
+      />
+      {method === 'temp' && (
+        <div className="flex items-end gap-3">
+          <div className="flex-1">
+            <TextField
+              label="Temporary password"
+              placeholder="At least 10 characters"
+              value={temp}
+              onChange={(e) => setTemp(e.target.value)}
+              autoComplete="off"
+            />
+          </div>
+          <Button variant="outline" onClick={gen}>
+            Generate
+          </Button>
+        </div>
+      )}
+      <Checkbox
+        checked={signOut}
+        onChange={(e) => setSignOut(e.target.checked)}
+        label="Sign the user out of all devices"
+      />
+      {err && (
+        <p role="alert" className="rounded-xl bg-bad-soft px-4 py-3 text-sm text-bad">
+          {err}
+        </p>
+      )}
+    </Modal>
+  );
+}
+
+export * from './PlanAndStatusModals';

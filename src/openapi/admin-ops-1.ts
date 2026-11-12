@@ -1,0 +1,260 @@
+import { loginSchema } from '@/features/auth/schemas/auth';
+
+import { inviteMember } from '@/features/team/schemas/team';
+
+import type { Op } from './dsl';
+
+export const ops: Op[] = [
+  // ---- Auth
+  {
+    method: 'post',
+    path: '/api/auth/login',
+    tag: 'Auth',
+    auth: [],
+    summary: 'Sign in with email and password',
+    description:
+      'Starts a session in the `mfa` or `setup` stage. Accounts lock for 15 minutes after repeated failures.',
+    body: loginSchema,
+    codes: { 423: 'Account locked' },
+  },
+  {
+    method: 'post',
+    path: '/api/auth/mfa',
+    tag: 'Auth',
+    summary: 'Verify the 6-digit TOTP, e-mailed or backup code',
+    body: { type: 'object', required: ['code'], properties: { code: { type: 'string' } } },
+    codes: { 423: 'Too many attempts' },
+  },
+  {
+    method: 'post',
+    path: '/api/auth/mfa/email',
+    tag: 'Auth',
+    summary: 'E-mail a one-time sign-in code',
+    description: 'Limited to one code per 30 seconds.',
+  },
+  {
+    method: 'get',
+    path: '/api/auth/mfa/setup',
+    tag: 'Auth',
+    summary: 'TOTP secret and QR code for enrolment',
+  },
+  {
+    method: 'post',
+    path: '/api/auth/mfa/setup',
+    tag: 'Auth',
+    summary: 'Confirm enrolment; returns one-time backup codes',
+    body: { type: 'object', required: ['code'], properties: { code: { type: 'string' } } },
+  },
+  {
+    method: 'get',
+    path: '/api/auth/setup',
+    tag: 'Auth',
+    summary: 'What first-login setup still needs (password change, MFA)',
+  },
+  {
+    method: 'post',
+    path: '/api/auth/setup/password',
+    tag: 'Auth',
+    summary: 'Set the new password at first login',
+    body: {
+      type: 'object',
+      required: ['password'],
+      properties: { password: { type: 'string', minLength: 10 } },
+    },
+  },
+  {
+    method: 'post',
+    path: '/api/auth/setup/complete',
+    tag: 'Auth',
+    summary: 'Finish setup and activate the session',
+  },
+  {
+    method: 'get',
+    path: '/api/auth/session',
+    tag: 'Auth',
+    summary: 'Current session, role and permissions',
+  },
+  { method: 'post', path: '/api/auth/logout', tag: 'Auth', summary: 'Sign out' },
+  {
+    method: 'post',
+    path: '/api/auth/forgot',
+    tag: 'Auth',
+    auth: [],
+    summary: 'Request a password-reset code by e-mail',
+    body: {
+      type: 'object',
+      required: ['email'],
+      properties: { email: { type: 'string', format: 'email' } },
+    },
+    description: 'Always responds 200 so account existence is not revealed.',
+  },
+  {
+    method: 'post',
+    path: '/api/auth/reset',
+    tag: 'Auth',
+    auth: [],
+    summary: 'Reset the password with the e-mailed code',
+    body: {
+      type: 'object',
+      required: ['email', 'code', 'password'],
+      properties: {
+        email: { type: 'string' },
+        code: { type: 'string' },
+        password: { type: 'string' },
+      },
+    },
+  },
+  {
+    method: 'get',
+    path: '/api/auth/invite',
+    tag: 'Auth',
+    auth: [],
+    summary: 'Check an invitation token',
+    query: [{ name: 'token', required: true }],
+  },
+  {
+    method: 'post',
+    path: '/api/auth/invite',
+    tag: 'Auth',
+    auth: [],
+    summary: 'Accept an invitation and choose a password',
+    body: {
+      type: 'object',
+      required: ['token', 'password'],
+      properties: { token: { type: 'string' }, password: { type: 'string' } },
+    },
+  },
+  { method: 'get', path: '/api/auth/sessions', tag: 'Auth', summary: 'My signed-in devices' },
+  {
+    method: 'delete',
+    path: '/api/auth/sessions/{sid}',
+    tag: 'Auth',
+    summary: 'Sign out one device',
+  },
+  {
+    method: 'post',
+    path: '/api/auth/sessions/others',
+    tag: 'Auth',
+    summary: 'Sign out every other device',
+  },
+  // ---- Profile
+  { method: 'get', path: '/api/profile', tag: 'Profile', summary: 'My profile' },
+  {
+    method: 'put',
+    path: '/api/profile',
+    tag: 'Profile',
+    summary: 'Update my profile',
+    body: { type: 'object', properties: { name: { type: 'string' }, phone: { type: 'string' } } },
+  },
+  {
+    method: 'post',
+    path: '/api/profile/password',
+    tag: 'Profile',
+    summary: 'Change my password',
+    body: {
+      type: 'object',
+      required: ['current', 'next'],
+      properties: { current: { type: 'string' }, next: { type: 'string' } },
+    },
+  },
+  {
+    method: 'post',
+    path: '/api/profile/avatar',
+    tag: 'Profile',
+    summary: 'Upload my avatar (PNG/JPEG/WebP, ≤ 2 MB)',
+    body: { type: 'object', properties: { dataUrl: { type: 'string' } } },
+  },
+  { method: 'delete', path: '/api/profile/avatar', tag: 'Profile', summary: 'Remove my avatar' },
+  // ---- Team
+  {
+    method: 'get',
+    path: '/api/team/members',
+    tag: 'Team & roles',
+    perm: 'team.manage',
+    summary: 'List team members',
+  },
+  {
+    method: 'post',
+    path: '/api/team/members',
+    tag: 'Team & roles',
+    perm: 'team.manage',
+    summary: 'Invite a team member',
+    description: 'E-mails a single-use invitation link (72 h). No password is ever e-mailed.',
+    body: inviteMember,
+  },
+  {
+    method: 'patch',
+    path: '/api/team/members/{id}',
+    tag: 'Team & roles',
+    perm: 'team.manage',
+    summary: 'Change a member’s role or access expiry',
+    body: {
+      type: 'object',
+      properties: { role: { type: 'string' }, accessExpires: { type: 'string', format: 'date' } },
+    },
+  },
+  {
+    method: 'delete',
+    path: '/api/team/members/{id}',
+    tag: 'Team & roles',
+    perm: 'team.manage',
+    summary: 'Remove a member',
+  },
+  {
+    method: 'post',
+    path: '/api/team/members/{id}/resend',
+    tag: 'Team & roles',
+    perm: 'team.manage',
+    summary: 'Resend an invitation',
+  },
+  {
+    method: 'post',
+    path: '/api/team/members/{id}/reset-mfa',
+    tag: 'Team & roles',
+    perm: 'team.manage',
+    summary: 'Reset a member’s MFA and sign them out',
+  },
+  {
+    method: 'get',
+    path: '/api/team/roles',
+    tag: 'Team & roles',
+    perm: 'team.manage',
+    summary: 'List roles and their permissions',
+  },
+  {
+    method: 'post',
+    path: '/api/team/roles',
+    tag: 'Team & roles',
+    perm: 'team.manage',
+    summary: 'Create a custom role',
+    body: {
+      type: 'object',
+      required: ['name', 'permissions'],
+      properties: {
+        name: { type: 'string' },
+        permissions: { type: 'array', items: { type: 'string' } },
+      },
+    },
+  },
+  {
+    method: 'put',
+    path: '/api/team/roles/{id}',
+    tag: 'Team & roles',
+    perm: 'team.manage',
+    summary: 'Edit a role (Super Admin is locked)',
+    body: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        permissions: { type: 'array', items: { type: 'string' } },
+      },
+    },
+  },
+  {
+    method: 'delete',
+    path: '/api/team/roles/{id}',
+    tag: 'Team & roles',
+    perm: 'team.manage',
+    summary: 'Delete a role that has no members',
+  },
+];

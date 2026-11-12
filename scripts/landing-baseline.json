@@ -1,0 +1,392 @@
+{
+  "extras": {
+    "site": {
+      "brand": {
+        "name": "Kanaku"
+      },
+      "locale": "en",
+      "labels": {
+        "skipToContent": "Skip to content",
+        "openMenu": "Open menu",
+        "closeMenu": "Close menu",
+        "primaryNav": "Primary",
+        "footerNav": "Footer",
+        "homeLink": "{brand} home",
+        "toggleTheme": "Toggle light and dark theme",
+        "emptyPage": "This page has no content yet.",
+        "faqNoAnswer": "Answer coming soon.",
+        "errorTitle": "Something went wrong",
+        "errorMessage": "An unexpected error occurred. Please try again.",
+        "retry": "Try again"
+      },
+      "seo": {
+        "title": "Kanaku — Spend smart. Grow faster.",
+        "description": "Kanaku gives you a real-time view of every rupee — track expenses, control budgets and make confident money decisions."
+      }
+    },
+    "theme": {
+      "modes": ["light", "dark"],
+      "defaultMode": "system"
+    },
+    "flags": {},
+    "notFound": {
+      "heading": "This page is still balancing its books",
+      "description": "Our number-crunchers are working overtime on it. Hang tight — it'll be worth every rupee.",
+      "progress": {
+        "label": "Crunching numbers…",
+        "value": 65
+      },
+      "secondaryCta": {
+        "label": "Take me home",
+        "href": "/"
+      }
+    },
+    "navbar": {
+      "links": [
+        {
+          "label": "Features",
+          "href": "#features"
+        },
+        {
+          "label": "How it works",
+          "href": "#how-it-works"
+        },
+        {
+          "label": "Pricing",
+          "href": "#pricing"
+        },
+        {
+          "label": "FAQ",
+          "href": "#faq"
+        }
+      ],
+      "secondaryCta": {
+        "label": "Log in",
+        "href": "{userApp}/login",
+        "variant": "outline-inverse"
+      },
+      "primaryCta": {
+        "label": "Get started free",
+        "href": "{userApp}/signup"
+      },
+      "themeToggle": true
+    },
+    "hero": {
+      "note": "Free to start · No card required · Works on any device",
+      "visual": {
+        "kind": "overview-card",
+        "label": "November overview",
+        "value": "₹46,580",
+        "caption": "saved of ₹85,000 earned",
+        "bars": [
+          {
+            "value": 84
+          },
+          {
+            "value": 105
+          },
+          {
+            "value": 73
+          },
+          {
+            "value": 123
+          },
+          {
+            "value": 98
+          },
+          {
+            "value": 140,
+            "highlight": true
+          }
+        ],
+        "floating": {
+          "label": "Food budget",
+          "value": "₹1,550 left",
+          "progress": 85
+        }
+      }
+    },
+    "features": {
+      "eyebrow": "Features",
+      "title": "Everything you need to manage spending."
+    },
+    "steps": {
+      "title": "Up and running in three steps",
+      "items": [
+        {
+          "title": "Create your account",
+          "description": "Sign up free with email or Google in under a minute."
+        },
+        {
+          "title": "Set your budget",
+          "description": "Tell Kanaku your monthly income and limits for each category."
+        },
+        {
+          "title": "Track and thrive",
+          "description": "Log spends as they happen and watch your savings rise."
+        }
+      ]
+    },
+    "pricing": {
+      "title": "Simple, transparent pricing"
+    },
+    "faq": {
+      "title": "Frequently asked questions"
+    },
+    "cta": {
+      "title": "Take control of your finances today.",
+      "description": "Join Kanaku today and set up your account in under two minutes.",
+      "cta": {
+        "label": "Create my free account",
+        "href": "{userApp}/signup",
+        "variant": "dark"
+      }
+    },
+    "footer": {
+      "columns": [
+        {
+          "title": "Product",
+          "links": [
+            {
+              "label": "Features",
+              "href": "#features"
+            },
+            {
+              "label": "Pricing",
+              "href": "#pricing"
+            }
+          ]
+        },
+        {
+          "title": "Company",
+          "links": [
+            {
+              "label": "About",
+              "href": "/about"
+            },
+            {
+              "label": "Contact",
+              "href": "/contact"
+            }
+          ]
+        },
+        {
+          "title": "Legal",
+          "links": [
+            {
+              "label": "Privacy",
+              "href": "/privacy"
+            },
+            {
+              "label": "Terms",
+              "href": "/terms"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "cms": {
+    "hero": {
+      "eyebrow": "Expense tracking for modern professionals",
+      "headline": "Spend smart. Grow faster.",
+      "subheading": "Kanaku gives you a real-time view of every rupee — track expenses, control budgets and make confident money decisions.",
+      "image": null,
+      "ctaLimit": 2,
+      "ctas": [
+        {
+          "id": "c1",
+          "label": "Get started free",
+          "href": "https://growwithkanaku-user.vercel.app/signup",
+          "style": "primary"
+        },
+        {
+          "id": "c2",
+          "label": "See how it works",
+          "href": "#how-it-works",
+          "style": "secondary"
+        }
+      ],
+      "note": "Free to start · No card required · Works on any device",
+      "visual": {
+        "label": "November overview",
+        "value": "₹46,580",
+        "caption": "saved of ₹85,000 earned",
+        "bars": [
+          {
+            "value": 84,
+            "highlight": false
+          },
+          {
+            "value": 105,
+            "highlight": false
+          },
+          {
+            "value": 73,
+            "highlight": false
+          },
+          {
+            "value": 123,
+            "highlight": false
+          },
+          {
+            "value": 98,
+            "highlight": false
+          },
+          {
+            "value": 140,
+            "highlight": true
+          }
+        ],
+        "floating": {
+          "label": "Food budget",
+          "value": "₹1,550 left",
+          "progress": 85
+        }
+      }
+    },
+    "features": [
+      {
+        "id": "f1",
+        "icon": "plus",
+        "title": "Record in seconds",
+        "description": "Add a spend in two taps with smart categories and quick-add favourites.",
+        "visible": true
+      },
+      {
+        "id": "f2",
+        "icon": "wallet",
+        "title": "Smart budgets",
+        "description": "Set limits per category and get a gentle nudge before you cross them.",
+        "visible": true
+      },
+      {
+        "id": "f3",
+        "icon": "chart",
+        "title": "Actionable reports",
+        "description": "See trends, top categories and month-on-month changes at a glance.",
+        "visible": true
+      },
+      {
+        "id": "f4",
+        "icon": "repeat",
+        "title": "Recurring payments",
+        "description": "Rent, subscriptions and salary are logged for you on schedule.",
+        "visible": true
+      },
+      {
+        "id": "f5",
+        "icon": "receipt",
+        "title": "Receipt vault",
+        "description": "Snap a bill and keep it safely attached to the transaction.",
+        "visible": true
+      },
+      {
+        "id": "f6",
+        "icon": "bell",
+        "title": "Real-time alerts",
+        "description": "Bill reminders and budget warnings arrive right when they matter.",
+        "visible": true
+      }
+    ],
+    "pricing": {
+      "defaultView": "monthly",
+      "plans": [
+        {
+          "planId": "plan_starter",
+          "visible": true,
+          "badge": "",
+          "ctaLabel": "Start free",
+          "ctaHref": "https://growwithkanaku-user.vercel.app/signup",
+          "bullets": ["Unlimited transactions", "Up to 5 budgets", "Monthly reports"]
+        },
+        {
+          "planId": "plan_pro",
+          "visible": true,
+          "badge": "Most popular",
+          "ctaLabel": "Upgrade to Pro",
+          "ctaHref": "https://growwithkanaku-user.vercel.app/signup",
+          "bullets": [
+            "Everything in Starter",
+            "Unlimited budgets & recurring",
+            "Receipt vault & PDF exports",
+            "Smart alerts"
+          ]
+        }
+      ]
+    },
+    "faq": [
+      {
+        "id": "q1",
+        "question": "Is Kanaku free to use?",
+        "answer": "Yes. The Starter plan is free forever. Upgrade to Pro any time for unlimited budgets, recurring payments and exports.",
+        "category": "Billing",
+        "visible": true
+      },
+      {
+        "id": "q2",
+        "question": "Does Kanaku connect to my bank?",
+        "answer": "No. You record transactions yourself, so Kanaku never needs your banking credentials.",
+        "category": "Security",
+        "visible": true
+      },
+      {
+        "id": "q3",
+        "question": "Can I use it on my phone?",
+        "answer": "Yes. Kanaku works in any modern browser on phones, tablets and desktops.",
+        "category": "General",
+        "visible": true
+      },
+      {
+        "id": "q4",
+        "question": "Can I export my data?",
+        "answer": "Yes. Export your transactions and reports to Excel or CSV from Settings at any time.",
+        "category": "Data & privacy",
+        "visible": true
+      }
+    ],
+    "footer": {
+      "tagline": "Spend smart. Grow faster.",
+      "supportEmail": "support@kanaku.com",
+      "copyright": "© 2026 Kanaku. All rights reserved."
+    },
+    "theme": {
+      "primary": "#1d4ed8",
+      "secondary": "#0b1220",
+      "accent": "#22d3ee",
+      "background": "#f1f5fa",
+      "surface": "#ffffff",
+      "text": "#0f172a",
+      "radius": "lg",
+      "buttonStyle": "solid"
+    },
+    "navbar": {
+      "links": [
+        {
+          "id": "n1",
+          "label": "Features",
+          "href": "#features"
+        },
+        {
+          "id": "n2",
+          "label": "How it works",
+          "href": "#how-it-works"
+        },
+        {
+          "id": "n3",
+          "label": "Pricing",
+          "href": "#pricing"
+        },
+        {
+          "id": "n4",
+          "label": "FAQ",
+          "href": "#faq"
+        }
+      ],
+      "loginLabel": "Log in",
+      "loginHref": "{userApp}/login",
+      "signupLabel": "Get started free",
+      "signupHref": "{userApp}/signup"
+    }
+  }
+}
