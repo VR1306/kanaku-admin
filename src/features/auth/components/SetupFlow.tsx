@@ -3,10 +3,11 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { PasswordField, TextField } from '@/components/ui/Field';
+import { PasswordField } from '@/components/ui/Field';
 import { api, ApiError } from '@/lib/api-client';
-import { confirmMfaSchema, setPasswordSchema } from '../schemas/auth';
+import { setPasswordSchema } from '../schemas/auth';
 import { PasswordChecklist } from './ForgotForms';
+import { MfaSetupStep } from './MfaSetupStep';
 
 type Status = { needsPassword: boolean; needsMfa: boolean; email: string };
 
@@ -133,66 +134,21 @@ export function SetupFlow() {
 
   if (status.needsMfa) {
     return (
-      <form
-        className="space-y-4"
-        onSubmit={(e) => {
-          e.preventDefault();
+      <MfaSetupStep
+        qr={qr}
+        code={code}
+        onCode={setCode}
+        error={error}
+        busy={busy}
+        onSubmit={() =>
           guard(async () => {
             const r = await api<{ backupCodes: string[] }>('/api/auth/mfa/setup', {
               body: { code },
             });
             setCodes(r.backupCodes);
-          });
-        }}
-      >
-        <p className="text-xs font-bold tracking-widest text-muted">STEP 2 OF 3</p>
-        <h2 className="text-2xl font-extrabold">Set up two-step verification</h2>
-        <p className="text-sm text-muted">
-          Scan the QR code with an authenticator app, then enter the 6-digit code.
-        </p>
-        {qr ? (
-          <div className="flex flex-col items-center gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={qr.qr}
-              alt="Authenticator QR code"
-              width={240}
-              height={240}
-              className="rounded-xl border border-line bg-white p-2"
-            />
-            <p className="text-xs text-muted">
-              Can&apos;t scan? In Google Authenticator tap + → Enter a setup key, account
-              &quot;Kanaku Admin&quot;, type: Time based, and enter:
-            </p>
-            <code className="rounded-lg bg-canvas px-3 py-2 font-mono text-sm tracking-wider break-all select-all">
-              {qr.secret.match(/.{1,4}/g)?.join(' ')}
-            </code>
-          </div>
-        ) : (
-          <p className="text-sm text-muted">Loading QR code…</p>
-        )}
-        <TextField
-          label="6-digit code"
-          placeholder="e.g. 123456"
-          inputMode="numeric"
-          maxLength={6}
-          value={code}
-          onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-        />
-        {error && (
-          <p role="alert" className="text-sm text-bad">
-            {error}
-          </p>
-        )}
-        <Button
-          type="submit"
-          className="w-full"
-          loading={busy}
-          disabled={!confirmMfaSchema.safeParse({ code }).success}
-        >
-          Verify
-        </Button>
-      </form>
+          })
+        }
+      />
     );
   }
 
