@@ -53,7 +53,7 @@ export function TicketListPane({ list, view, onView, q, onQ, selected, onSelect 
           tabs={VIEWS.map(([id, label]) => ({
             value: id,
             label,
-            count: id !== 'resolved' ? data?.counts[id] : undefined,
+            count: id !== 'resolved' ? (data?.counts[id] ?? 0) : undefined,
           }))}
           value={view}
           onChange={onView}
