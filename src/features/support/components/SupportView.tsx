@@ -36,7 +36,7 @@ export function SupportView() {
   const { reload: reloadList } = list;
   const { reload: reloadDetail } = detail;
 
-  const { connected, emit } = useRealtime(
+  const { connected, available, emit } = useRealtime(
     {
       // New / changed conversations arrive instantly; refetch the list and the open conversation.
       'chat:updated': (p: { ticketId: string }) => {
@@ -189,7 +189,11 @@ export function SupportView() {
           aria-hidden
           className={`inline-block size-2 rounded-full ${connected ? 'bg-ok' : 'bg-warn'}`}
         />
-        {connected ? 'Live — new messages arrive instantly.' : 'Reconnecting to live updates…'}{' '}
+        {connected
+          ? 'Live — new messages arrive instantly.'
+          : available
+            ? 'Reconnecting to live updates…'
+            : 'Refreshing every few seconds.'}{' '}
         Tickets close automatically 7 days after resolution.
       </p>
     </div>

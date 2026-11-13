@@ -43,3 +43,6 @@ next-env.d.ts
 
 # database backups made by scripts/reset-db.mjs (contain real data)
 /backups/
+
+# production env files with generated secrets (never commit)
+/deploy-env/

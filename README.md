@@ -19,6 +19,8 @@ Next.js 16 (App Router, Cache Components) admin console. See `AGENTS.md` — rea
 
 Shared secrets (same value in each app's `.env.local`): `SERVICE_API_KEY`, `REALTIME_SECRET`. In the admin also set `USER_APP_URL=http://localhost:3002`, `LANDING_URL=http://localhost:3000`, `LANDING_REVALIDATE_SECRET` (= the landing's `REVALIDATE_SECRET`). **Swagger:** http://localhost:3001/docs/admin · `/docs/user` · `/docs/landing`. Full details: `docs/API_INTEGRATION.md`.
 
+**Deploying:** see `docs/DEPLOYMENT.md` (live URLs, per-app environment variables, the realtime services, and a post-deploy checklist).
+
 ## Architecture
 
 `src/app` routing + `app/api` BFF handlers only · `src/features/<domain>` components/schemas · `src/components/ui` shared UI · `src/services` data layer (**MongoDB**, via `src/lib/db.ts`) · `src/lib` session/BFF/permissions.

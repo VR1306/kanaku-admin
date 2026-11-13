@@ -12,7 +12,8 @@ let shared: { socket: Socket; users: number } | null = null;
 async function connect(): Promise<Socket | null> {
   const r = await fetch('/api/realtime/token', { credentials: 'same-origin' }).catch(() => null);
   if (!r?.ok) return null;
-  const { url } = (await r.json()) as { token: string; url: string };
+  const { url } = (await r.json()) as { token: string; url: string | null };
+  if (!url) return null; // realtime isn't configured on this deployment
   return io(url, {
     transports: ['websocket', 'polling'],
     reconnectionDelayMax: 10_000,
@@ -31,6 +32,7 @@ export function useRealtime(
   onResync?: () => void,
 ) {
   const [connected, setConnected] = useState(false);
+  const [available, setAvailable] = useState(true); // false when no realtime service is configured
   const ref = useRef({ handlers, onResync });
   useEffect(() => {
     ref.current = { handlers, onResync };
@@ -43,7 +45,10 @@ export function useRealtime(
     void (async () => {
       if (!shared) {
         const socket = await connect();
-        if (!socket) return;
+        if (!socket) {
+          if (!dead) setAvailable(false);
+          return;
+        }
         shared ??= { socket, users: 0 };
         if (shared.socket !== socket) socket.close();
       }
@@ -83,5 +88,5 @@ export function useRealtime(
   }, [names]);
 
   const emit = (event: string, payload: unknown) => shared?.socket.emit(event, payload);
-  return { connected, emit };
+  return { connected, available, emit };
 }
