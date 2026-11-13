@@ -102,15 +102,12 @@ export const ops: Op[] = [
     path: '/api/users/{id}/reset-password',
     tag: 'Users',
     perm: 'users.resetPassword',
-    summary: 'Send a reset link or set a temporary password',
+    summary: 'E-mail the customer a password-reset link',
+    description:
+      'Sends an email pointing to the User App’s reset page (the customer gets a 6-digit code and chooses the new password). Optionally signs them out of every device. Responds `{ emailed, signedOut }`.',
     body: {
       type: 'object',
-      required: ['method'],
-      properties: {
-        method: { enum: ['link', 'temp'] },
-        tempPassword: { type: 'string' },
-        signOutAll: { type: 'boolean' },
-      },
+      properties: { method: { enum: ['link'] }, signOutAll: { type: 'boolean' } },
     },
   },
   // ---- Plans / coupons / payments

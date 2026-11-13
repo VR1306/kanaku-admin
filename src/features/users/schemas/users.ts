@@ -30,14 +30,11 @@ export const addUserBody = z.object({
   sendInvite: z.boolean().default(true),
 });
 
-export const resetPasswordBody = z.discriminatedUnion('method', [
-  z.object({ method: z.literal('link'), signOutAll: z.boolean().default(true) }),
-  z.object({
-    method: z.literal('temp'),
-    tempPassword: z.string().min(10, 'Temporary password must be at least 10 characters'),
-    signOutAll: z.boolean().default(true),
-  }),
-]);
+/** Only an e-mailed reset exists: passwords live in the User App, so an admin can't set one. */
+export const resetPasswordBody = z.object({
+  method: z.literal('link').default('link'),
+  signOutAll: z.boolean().default(true),
+});
 
 export const changePlanBody = z.object({
   plan: z.enum(['starter', 'pro_monthly', 'pro_yearly']),

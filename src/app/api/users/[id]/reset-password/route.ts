@@ -1,8 +1,9 @@
-import { randomBytes } from 'node:crypto';
 import type { NextRequest } from 'next/server';
 import { route, HttpError } from '@/lib/bff';
 import { resetPasswordBody } from '@/features/users/schemas/users';
+import { sendUserPasswordHelp } from '@/lib/mailer';
 import { getUser, markPasswordReset } from '@/services/users';
+import { signOutCustomerEverywhere } from '@/services/user-app';
 
 export async function POST(req: NextRequest, ctx: RouteContext<'/api/users/[id]/reset-password'>) {
   const { id } = await ctx.params;
@@ -11,18 +12,18 @@ export async function POST(req: NextRequest, ctx: RouteContext<'/api/users/[id]/
     async ({ body, audit }) => {
       const u = await getUser(id);
       if (!u) throw new HttpError(404, 'User not found', 'not_found');
+      const base = (process.env.USER_APP_URL ?? 'https://growwithkanaku-user.vercel.app').replace(
+        /\/$/,
+        '',
+      );
+      // The customer chooses a new password themselves through the User App's own reset page (code by e-mail).
+      const emailed = await sendUserPasswordHelp(u.email, u.name, `${base}/forgot-password`);
+      const signedOut = body.signOutAll ? await signOutCustomerEverywhere(id) : false;
       await markPasswordReset(id);
       await audit('Reset user password', `User · ${u.name} (${id})`, {
-        after: {
-          method: body.method,
-          signOutAll: body.signOutAll,
-          forceChange: body.method === 'temp',
-        },
+        after: { emailed, signOutAll: body.signOutAll, signedOut },
       });
-      // The temporary password is never echoed back or logged; link is MOCK-delivered (30 minute single-use).
-      return body.method === 'link'
-        ? { method: 'link', expiresInMinutes: 30, link: `reset/${randomBytes(12).toString('hex')}` }
-        : { method: 'temp', forceChange: true };
+      return { method: 'link', emailed, signedOut };
     },
   )(req);
 }

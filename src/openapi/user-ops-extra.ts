@@ -278,4 +278,14 @@ export const extraOps: Op[] = [
       'Plan-controlled modules (dashboard, transactions, budgets, reports, recurring, notifications, exports) return `403 plan_required` when the customer’s plan does not include them. Creating more budgets than the plan allows returns `403 plan_limit`. Which modules each plan includes is set in the Admin Portal (Plans → Customer access) and read from `GET /api/v1/public/plans` (`modules`, `maxBudgets`).',
     codes: { 403: 'plan_required: module not in the customer’s plan' },
   },
+  {
+    method: 'post',
+    path: '/api/integrations/admin/users/sign-out',
+    tag: 'Integration (Admin Portal)',
+    auth: svc,
+    summary: 'End every session of a customer',
+    description:
+      'Server-to-server from the Admin Portal (“Reset password → sign out of all devices”). `Authorization: Bearer <SERVICE_API_KEY>`.',
+    body: { type: 'object', required: ['userId'], properties: { userId: { type: 'string' } } },
+  },
 ];

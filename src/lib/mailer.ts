@@ -104,6 +104,41 @@ export const sendUserInvite = (to: string, name: string, signupUrl: string) =>
     `Hi ${name}, you've been invited to Kanaku. Create your account with this email address (${to}): ${signupUrl}`,
   );
 
+/** Tells the support team a new conversation has started (restores the alert the User App used to send). */
+export const sendNewTicketAlert = (
+  to: string,
+  t: {
+    id: string;
+    subject: string;
+    topic: string;
+    userName: string;
+    plan: string;
+    message: string;
+    consoleUrl: string;
+  },
+) =>
+  sendMail(
+    to,
+    `New ${t.topic} ticket ${t.id}: ${t.subject}`,
+    layout(
+      `New support ticket ${t.id}`,
+      `<p><b>${esc(t.userName)}</b> (${esc(t.plan)} plan) · ${esc(t.topic)}</p><p style="font-weight:700">${esc(t.subject)}</p><p style="white-space:pre-line;background:#f1f5fa;border-radius:12px;padding:12px">${esc(t.message.slice(0, 600))}</p>${button(t.consoleUrl, 'Open in the console')}`,
+    ),
+    `New ${t.topic} ticket ${t.id} from ${t.userName} (${t.plan}): ${t.subject}\n\n${t.message.slice(0, 600)}\n\nOpen: ${t.consoleUrl}`,
+  );
+
+/** Sent when an admin triggers "Reset password" for a customer: points them at the User App's own reset page (code by e-mail). */
+export const sendUserPasswordHelp = (to: string, name: string, resetUrl: string) =>
+  sendMail(
+    to,
+    'Reset your Kanaku password',
+    layout(
+      `Hi ${name}, let's reset your password`,
+      `<p>Our support team started a password reset for your Kanaku account. Open the page below, enter <b>${esc(to)}</b>, and we'll email you a 6-digit code to choose a new password.</p>${button(resetUrl, 'Reset my password')}<p style="font-size:12px;word-break:break-all;color:#64748b">${esc(resetUrl)}</p><p style="font-size:12px;color:#64748b">If you didn't ask for this you can ignore this email: nothing changes unless you complete the reset.</p>`,
+    ),
+    `Hi ${name}, our support team started a password reset for your Kanaku account. Open ${resetUrl}, enter ${to}, and we'll email you a code to choose a new password.`,
+  );
+
 export const sendResetCode = (to: string, code: string) =>
   sendMail(
     to,

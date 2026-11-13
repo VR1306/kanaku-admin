@@ -9,7 +9,7 @@ import { useToast } from '@/components/ui/Toast';
 import { api } from '@/lib/api-client';
 import { type AppUser } from '@/types/users';
 import { addUserBody } from '../schemas/users';
-import { Choice, PLAN_OPTIONS, msg } from './modal-shared';
+import { PLAN_OPTIONS, msg } from './modal-shared';
 
 export function AddUserModal({
   open,
@@ -157,33 +157,25 @@ export function ResetPasswordModal({
   onDone: () => void;
 }) {
   const { toast } = useToast();
-  const [method, setMethod] = useState<'link' | 'temp'>('link');
-  const [temp, setTemp] = useState('');
   const [signOut, setSignOut] = useState(true);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
-  const gen = () =>
-    setTemp(
-      `Kn-${crypto.randomUUID().slice(0, 4)}-${crypto.randomUUID().slice(0, 4)}-${crypto.randomUUID().slice(0, 2)}`,
-    );
-  const invalid = method === 'temp' && temp.length < 10;
   async function submit() {
     setBusy(true);
     try {
-      await api(`/api/users/${user!.id}/reset-password`, {
-        body:
-          method === 'link'
-            ? { method, signOutAll: signOut }
-            : { method, tempPassword: temp, signOutAll: signOut },
-      });
-      toast(
-        method === 'link'
-          ? 'Reset link sent (valid 30 minutes)'
-          : 'Temporary password set — user must change it at next sign-in',
+      const r = await api<{ emailed: boolean; signedOut: boolean }>(
+        `/api/users/${user!.id}/reset-password`,
+        { body: { method: 'link', signOutAll: signOut } },
       );
-      onClose();
-      onDone();
-      setTemp('');
+      toast(
+        r.emailed
+          ? `Reset email sent to ${user!.email}${signOut && r.signedOut ? ' · signed out of all devices' : ''}`
+          : 'The reset email could not be sent. Please try again shortly.',
+      );
+      if (r.emailed) {
+        onClose();
+        onDone();
+      }
       setErr('');
     } catch (e) {
       setErr(msg(e));
@@ -203,8 +195,8 @@ export function ResetPasswordModal({
           <Button variant="outline" onClick={onClose} disabled={busy}>
             Cancel
           </Button>
-          <Button disabled={invalid} loading={busy} onClick={submit}>
-            Reset password
+          <Button loading={busy} onClick={submit}>
+            Send reset email
           </Button>
         </>
       }
@@ -213,36 +205,11 @@ export function ResetPasswordModal({
         Last changed <b className="text-ink">{user?.lastPasswordChange ?? 'never'}</b> · MFA{' '}
         {user?.mfa ? 'on' : 'off'}
       </p>
-      <Choice
-        name="rp"
-        checked={method === 'link'}
-        onChange={() => setMethod('link')}
-        title="Send a reset link"
-        hint="The user gets an email link, valid for 30 minutes."
-      />
-      <Choice
-        name="rp"
-        checked={method === 'temp'}
-        onChange={() => setMethod('temp')}
-        title="Set a temporary password"
-        hint="The user must change it at their next sign-in."
-      />
-      {method === 'temp' && (
-        <div className="flex items-end gap-3">
-          <div className="flex-1">
-            <TextField
-              label="Temporary password"
-              placeholder="At least 10 characters"
-              value={temp}
-              onChange={(e) => setTemp(e.target.value)}
-              autoComplete="off"
-            />
-          </div>
-          <Button variant="outline" onClick={gen}>
-            Generate
-          </Button>
-        </div>
-      )}
+      <p className="text-sm text-muted">
+        We email <b className="text-ink">{user?.email}</b> a link to the app&apos;s password-reset
+        page. They enter their address, get a 6-digit code by email, and choose a new password
+        themselves. Nobody else ever sees it.
+      </p>
       <Checkbox
         checked={signOut}
         onChange={(e) => setSignOut(e.target.checked)}

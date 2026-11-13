@@ -33,3 +33,20 @@ export async function pushNotification(
   if (!r.ok) throw new Error(`User App responded ${r.status}`);
   return 'ok';
 }
+
+/** Ends every session of a customer in the User App (used by "sign out of all devices"). Best effort: returns false on failure. */
+export async function signOutCustomerEverywhere(userId: string): Promise<boolean> {
+  const key = process.env.SERVICE_API_KEY;
+  if (!key) return false;
+  try {
+    const r = await fetch(`${base()}/api/integrations/admin/users/sign-out`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${key}` },
+      body: JSON.stringify({ userId }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    return r.ok;
+  } catch {
+    return false;
+  }
+}

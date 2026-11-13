@@ -5,6 +5,7 @@ import type { Attachment, Message, Priority, Ticket, TicketStatus } from '@/type
 import { randomBytes } from 'node:crypto';
 import { col } from '@/lib/db';
 import { emitRealtime } from '@/lib/realtime';
+import { sendNewTicketAlert } from '@/lib/mailer';
 import { notifyAdmins } from '@/services/notifications';
 import { pushNotification } from '@/services/user-app';
 
@@ -153,6 +154,39 @@ export async function notifyUser(t: Ticket, text: string) {
   }
 }
 
+/** E-mails the assigned agent (or every eligible agent when unassigned) plus the shared SUPPORT_EMAIL, once per new ticket. */
+export async function emailStaffNewTicket(t: Ticket, body: string) {
+  try {
+    const wanted = new Set<string>();
+    if (process.env.SUPPORT_EMAIL) wanted.add(process.env.SUPPORT_EMAIL.trim().toLowerCase());
+    const ids = new Set(t.assignee ? [t.assignee] : (await agents()).map((a) => a.id));
+    for (const m of await listMembers()) if (ids.has(m.id)) wanted.add(m.email.toLowerCase());
+    // ADMIN_URL if set; otherwise Vercel's automatic production domain; otherwise just a relative link.
+    const base = (
+      process.env.ADMIN_URL ??
+      (process.env.VERCEL_PROJECT_PRODUCTION_URL
+        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+        : '')
+    ).replace(/\/$/, '');
+    const consoleUrl = `${base}/support?ticket=${encodeURIComponent(t.id)}`;
+    await Promise.all(
+      [...wanted].map((to) =>
+        sendNewTicketAlert(to, {
+          id: t.id,
+          subject: t.subject,
+          topic: t.topic,
+          userName: t.user.name,
+          plan: t.user.plan,
+          message: body,
+          consoleUrl,
+        }),
+      ),
+    );
+  } catch (e) {
+    console.error('[support] new-ticket email failed', (e as Error).message);
+  }
+}
+
 /** Notifies the assignee, or every online-eligible agent when nobody owns the ticket. */
 export async function alertStaff(t: Ticket, title: string, body: string) {
   const ids = t.assignee ? [t.assignee] : (await agents()).map((a) => a.id);
@@ -273,6 +307,7 @@ export async function createFromUserMessage(i: {
   t.messages.push(msg('user', i.body, t.createdAt, i.user.name));
   await save(t);
   await alertStaff(t, `New ${i.topic} ticket from ${i.user.name}`, i.body);
+  await emailStaffNewTicket(t, i.body); // never throws: a mail problem must not fail the customer's request
   return t;
 }
 
