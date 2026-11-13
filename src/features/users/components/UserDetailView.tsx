@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/Card';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useApi } from '@/hooks/useApi';
 import { cn } from '@/utils/cn';
+import { formatIST } from '@/utils/format';
 import { PLAN_LABEL, type UserDetail } from '@/types/users';
 import type { UserCaps } from './UsersView';
 import { EditUserModal } from './EditUserModal';
@@ -23,7 +24,7 @@ const TABS = ['Overview', 'Billing', 'Activity', 'Security'] as const;
 const Row = ({ k, v }: { k: string; v: React.ReactNode }) => (
   <div className="border-b border-line py-2 last:border-0">
     <dt className="text-xs text-muted">{k}</dt>
-    <dd className="font-semibold">{v}</dd>
+    <dd className="font-semibold">{v === '' || v == null ? '—' : v}</dd>
   </div>
 );
 
@@ -133,7 +134,7 @@ export function UserDetailView({ id, caps }: { id: string; caps: UserCaps }) {
                 k="Last active"
                 v={
                   u.lastActive
-                    ? `${new Date(u.lastActive).toLocaleString('en-IN')} · ${u.location}`
+                    ? [formatIST(u.lastActive), u.location].filter(Boolean).join(' · ')
                     : 'Never'
                 }
               />

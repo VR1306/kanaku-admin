@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { SelectField, TextField } from '@/components/ui/Field';
 import { ConfirmDialog, Modal } from '@/components/ui/Modal';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { useToast } from '@/components/ui/Toast';
 import { useApi } from '@/hooks/useApi';
 import { api, ApiError } from '@/lib/api-client';
@@ -101,72 +102,75 @@ export function RolesTab({
           {error}
         </p>
       )}
-      <Card className="overflow-x-auto p-0">
-        <table className="w-full min-w-[720px] border-collapse text-[15px]">
-          <caption className="sr-only">Role permissions matrix</caption>
-          <thead>
-            <tr className="bg-canvas">
-              <th
-                scope="col"
-                className="px-7 py-4 text-left text-xs font-bold tracking-[0.08em] text-muted uppercase"
-              >
-                Permission
-              </th>
-              {roles.map((r) => (
+      {!data && !error && <Skeleton className="h-[420px] w-full rounded-[24px]" />}
+      {data && (
+        <Card className="overflow-x-auto p-0">
+          <table className="w-full min-w-[720px] border-collapse text-[15px]">
+            <caption className="sr-only">Role permissions matrix</caption>
+            <thead>
+              <tr className="bg-canvas">
                 <th
-                  key={r.id}
                   scope="col"
-                  className="px-3 py-4 text-center text-xs font-bold tracking-[0.08em] whitespace-nowrap text-muted uppercase"
+                  className="px-7 py-4 text-left text-xs font-bold tracking-[0.08em] text-muted uppercase"
                 >
-                  {r.name}
-                  {!r.builtin && (
-                    <button
-                      className="ml-1.5 rounded text-bad hover:bg-bad-soft"
-                      aria-label={`Delete ${r.name}`}
-                      onClick={() => setDel(r)}
-                    >
-                      <Icon name="trash" size={14} />
-                    </button>
-                  )}
+                  Permission
                 </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {PERMISSION_GROUPS.map((g) => (
-              <Fragment key={g.group}>
-                <tr className="border-t border-line-soft bg-canvas/60">
-                  <td
-                    colSpan={roles.length + 1}
-                    className="px-7 py-2.5 text-xs font-bold tracking-[0.08em] text-ink-2 uppercase"
+                {roles.map((r) => (
+                  <th
+                    key={r.id}
+                    scope="col"
+                    className="px-3 py-4 text-center text-xs font-bold tracking-[0.08em] whitespace-nowrap text-muted uppercase"
                   >
-                    {g.group}
-                  </td>
-                </tr>
-                {g.items.map((it) => (
-                  <tr
-                    key={it.key}
-                    className="border-t border-line-soft transition-colors hover:bg-canvas/50"
-                  >
-                    <td className="px-7 py-3">{it.label}</td>
-                    {roles.map((r) => (
-                      <td key={r.id} className="px-3 py-3 text-center">
-                        <input
-                          type="checkbox"
-                          aria-label={`${r.name}: ${it.label}`}
-                          checked={r.id === 'super_admin' || perms(r).includes(it.key)}
-                          disabled={r.id === 'super_admin'}
-                          onChange={() => toggle(r, it.key)}
-                        />
-                      </td>
-                    ))}
-                  </tr>
+                    {r.name}
+                    {!r.builtin && (
+                      <button
+                        className="ml-1.5 rounded text-bad hover:bg-bad-soft"
+                        aria-label={`Delete ${r.name}`}
+                        onClick={() => setDel(r)}
+                      >
+                        <Icon name="trash" size={14} />
+                      </button>
+                    )}
+                  </th>
                 ))}
-              </Fragment>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+              </tr>
+            </thead>
+            <tbody>
+              {PERMISSION_GROUPS.map((g) => (
+                <Fragment key={g.group}>
+                  <tr className="border-t border-line-soft bg-canvas/60">
+                    <td
+                      colSpan={roles.length + 1}
+                      className="px-7 py-2.5 text-xs font-bold tracking-[0.08em] text-ink-2 uppercase"
+                    >
+                      {g.group}
+                    </td>
+                  </tr>
+                  {g.items.map((it) => (
+                    <tr
+                      key={it.key}
+                      className="border-t border-line-soft transition-colors hover:bg-canvas/50"
+                    >
+                      <td className="px-7 py-3">{it.label}</td>
+                      {roles.map((r) => (
+                        <td key={r.id} className="px-3 py-3 text-center">
+                          <input
+                            type="checkbox"
+                            aria-label={`${r.name}: ${it.label}`}
+                            checked={r.id === 'super_admin' || perms(r).includes(it.key)}
+                            disabled={r.id === 'super_admin'}
+                            onChange={() => toggle(r, it.key)}
+                          />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </Fragment>
+              ))}
+            </tbody>
+          </table>
+        </Card>
+      )}
 
       <Modal
         open={confirm}

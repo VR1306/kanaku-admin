@@ -145,7 +145,7 @@ export function AppShell({ user, permissions, supportOpen, children }: Props) {
       <main
         id="main"
         className={cn(
-          'px-4 py-8 transition-[padding] lg:pt-10 lg:pr-10 lg:pl-[calc(var(--sidebar-w)+40px)]',
+          'px-4 py-8 transition-[padding] lg:pt-16 lg:pr-10 lg:pl-[calc(var(--sidebar-w)+40px)]',
           SIDEBAR_MOTION,
         )}
       >
