@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import { cn } from '@/utils/cn';
 
 /** 0 = empty … 4 = strong. Counts length 8+/12+, a number, a special character and mixed case. */

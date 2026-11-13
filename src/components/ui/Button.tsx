@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, type HTMLMotionProps } from 'framer-motion';
+import { m as motion, type HTMLMotionProps } from 'framer-motion';
 import { SPRING } from '@/constants/motion';
 import { cn } from '@/utils/cn';
 import { Spinner } from './Spinner';

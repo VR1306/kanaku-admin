@@ -292,3 +292,26 @@ body:has(dialog[open]) {
 body:has([data-fullscreen]) {
   overflow: hidden;
 }
+
+/*
+ * CSS-only mount animation (replaces a JS opacity-0 start that held back first paint on every page).
+ * Starts at 0.01, not 0: Chrome ignores opacity-0 content for Largest Contentful Paint.
+ */
+@keyframes reveal-mount {
+  from {
+    opacity: 0.01;
+    transform: translate(var(--rx, 0px), var(--ry, 16px));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.reveal-mount {
+  animation: reveal-mount 0.45s cubic-bezier(0.22, 1, 0.36, 1) var(--rd, 0s) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-mount {
+    animation: none;
+  }
+}

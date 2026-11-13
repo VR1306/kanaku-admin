@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m as motion } from 'framer-motion';
 import { Icon } from '@/components/icons/icon';
 import {
   SIDEBAR_MOTION,

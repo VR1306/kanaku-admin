@@ -6,11 +6,15 @@ import { THEME_INIT_SCRIPT } from '@/constants/theme';
 import './globals.css';
 
 // latin-ext carries the rupee sign (U+20B9); without it ₹ falls back to a system font.
-const inter = Inter({ variable: '--font-inter', subsets: ['latin', 'latin-ext'] });
+const inter = Inter({
+  variable: '--font-inter',
+  subsets: ['latin', 'latin-ext'],
+  display: 'optional',
+});
 const jakarta = Plus_Jakarta_Sans({
   variable: '--font-jakarta',
   subsets: ['latin', 'latin-ext'],
-  weight: ['500', '600', '700', '800'],
+  display: 'optional',
 });
 
 export const metadata: Metadata = {

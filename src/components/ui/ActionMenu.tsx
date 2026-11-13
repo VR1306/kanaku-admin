@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m as motion } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { Icon, type IconName } from '@/components/icons/icon';
 import { cn } from '@/utils/cn';

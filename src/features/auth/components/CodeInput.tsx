@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import { useRef, type ClipboardEvent, type KeyboardEvent } from 'react';
 import { FOCUS_FIELD } from '@/constants/styles';
 import { cn } from '@/utils/cn';

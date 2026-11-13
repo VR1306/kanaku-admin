@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, type ReactNode } from 'react';
-import { AnimatePresence, animate, motion, useMotionValue, useTransform } from 'framer-motion';
+import { AnimatePresence, animate, m as motion, useMotionValue, useTransform } from 'framer-motion';
 import { EASE_OUT } from '@/constants/motion';
 
 const SWAP = { duration: 0.22, ease: EASE_OUT } as const;

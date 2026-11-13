@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import { EASE_OUT } from '@/constants/motion';
 import { formatCount } from '@/utils/format';
 import type { DashboardData } from '@/types/dashboard';

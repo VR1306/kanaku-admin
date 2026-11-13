@@ -1,10 +1,9 @@
-'use client';
+import type { CSSProperties, ReactNode } from 'react';
 
-import type { ReactNode } from 'react';
-import { motion } from 'framer-motion';
-import { TRANSITION } from '@/constants/motion';
-
-/** Fades and slides its content into place on mount. */
+/**
+ * Fades and slides its content into place on mount. Pure CSS (`.reveal-mount` in globals.css), so content paints
+ * without waiting for the animation library to load and hydrate.
+ */
 export function Reveal({
   children,
   delay = 0,
@@ -18,14 +17,10 @@ export function Reveal({
   y?: number;
   className?: string;
 }) {
+  const style = { '--rd': `${delay}s`, '--rx': `${x}px`, '--ry': `${y}px` } as CSSProperties;
   return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, x, y }}
-      animate={{ opacity: 1, x: 0, y: 0 }}
-      transition={{ ...TRANSITION, delay }}
-    >
+    <div className={`reveal-mount${className ? ` ${className}` : ''}`} style={style}>
       {children}
-    </motion.div>
+    </div>
   );
 }

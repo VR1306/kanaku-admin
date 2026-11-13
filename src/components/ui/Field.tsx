@@ -7,7 +7,7 @@ import {
   type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
 } from 'react';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import { Icon } from '@/components/icons/icon';
 import { FOCUS_FIELD } from '@/constants/styles';
 import { cn } from '@/utils/cn';

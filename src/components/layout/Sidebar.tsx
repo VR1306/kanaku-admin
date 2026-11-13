@@ -3,7 +3,7 @@
 import { useId, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import { Icon, type IconName } from '@/components/icons/icon';
 import { ConfirmDialog } from '@/components/ui/Modal';
 import { SIDEBAR_MOTION } from '@/constants/layout';

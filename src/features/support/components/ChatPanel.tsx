@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import { Icon } from '@/components/icons/icon';
 import { Button } from '@/components/ui/Button';
 import { Select, TextArea } from '@/components/ui/Field';
