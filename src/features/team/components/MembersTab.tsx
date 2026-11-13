@@ -30,7 +30,7 @@ export function MembersTab({
   const members = useApi<Member[]>('/api/team/members');
   const roles = useApi<RoleRow[]>('/api/team/roles');
   const [f, setF] = useState(blank);
-  const [link, setLink] = useState<{ email: string; url: string } | null>(null);
+  const [link, setLink] = useState<{ email: string; url: string; emailed: boolean } | null>(null);
   const [act, setAct] = useState<Action | null>(null);
   const [newRole, setNewRole] = useState('');
   const [err, setErr] = useState('');
@@ -76,10 +76,11 @@ export function MembersTab({
           icon: 'mail',
           onSelect: () =>
             run(async () => {
-              const r = await api<{ inviteLink: string }>(`/api/team/members/${m.id}/resend`, {
-                body: {},
-              });
-              setLink({ email: m.email, url: r.inviteLink });
+              const r = await api<{ inviteLink: string; emailed: boolean }>(
+                `/api/team/members/${m.id}/resend`,
+                { body: {} },
+              );
+              setLink({ email: m.email, url: r.inviteLink, emailed: r.emailed });
             }),
         }
       : { label: 'Reset MFA', icon: 'lock', onSelect: () => setAct({ kind: 'mfa', m }) },
@@ -172,11 +173,14 @@ export function MembersTab({
               loading={busy}
               onClick={() =>
                 run(async () => {
-                  const r = await api<{ inviteLink: string; email: string }>('/api/team/members', {
-                    body: { ...f, accessExpires: f.accessExpires || undefined },
-                  });
+                  const r = await api<{ inviteLink: string; email: string; emailed: boolean }>(
+                    '/api/team/members',
+                    {
+                      body: { ...f, accessExpires: f.accessExpires || undefined },
+                    },
+                  );
                   onAddChange(false);
-                  setLink({ email: r.email, url: r.inviteLink });
+                  setLink({ email: r.email, url: r.inviteLink, emailed: r.emailed });
                   setF(blank);
                 })
               }
@@ -229,8 +233,12 @@ export function MembersTab({
       <Modal
         open={!!link}
         variant="drawer"
-        title="Invitation sent"
-        subtitle="The invitation is emailed to the member. No password is ever emailed."
+        title={link?.emailed === false ? 'Invitation created, email not sent' : 'Invitation sent'}
+        subtitle={
+          link?.emailed === false
+            ? 'The email could not be delivered. Copy the link below and send it to the member yourself.'
+            : 'The invitation is emailed to the member. No password is ever emailed.'
+        }
         onClose={() => setLink(null)}
         footer={
           <>

@@ -28,6 +28,34 @@ const button = (href: string, label: string) =>
 const codeBox = (code: string) =>
   `<p style="font-size:30px;letter-spacing:8px;font-weight:800;background:#f1f5fa;border-radius:12px;padding:14px;text-align:center">${esc(code)}</p>`;
 
+/** Tests the SMTP login and the sender address WITHOUT sending anything (used by /api/health?mail=1). */
+export async function verifyMail(): Promise<{ ok: boolean; problem?: string }> {
+  if (!mailConfigured())
+    return { ok: false, problem: 'SMTP_HOST, SMTP_USER or SMTP_PASS is not set.' };
+  const from = process.env.MAIL_FROM ?? process.env.SMTP_USER ?? '';
+  if (!/<[^<>\s]+@[^<>\s]+>|^[^<>\s"]+@[^<>\s"]+$/.test(from))
+    return {
+      ok: false,
+      problem:
+        'MAIL_FROM is not a valid sender. Use: Kanaku <you@gmail.com> (no surrounding quotes).',
+    };
+  if (/[<>]/.test(process.env.SMTP_PASS ?? '') && /^</.test(process.env.SMTP_PASS ?? ''))
+    return {
+      ok: false,
+      problem: 'SMTP_PASS is still a <PLACEHOLDER>. Put the real Gmail app password.',
+    };
+  try {
+    await transport().verify();
+    return { ok: true };
+  } catch (e) {
+    const err = e as { code?: string; responseCode?: number };
+    return {
+      ok: false,
+      problem: `The mail server refused the login (${err.code ?? 'error'}${err.responseCode ? ` ${err.responseCode}` : ''}). Check SMTP_USER and that SMTP_PASS is a CURRENT Gmail app password (no spaces needed).`,
+    };
+  }
+}
+
 /** Sends one email. Returns false (and logs) instead of throwing, so a mail outage never breaks the request. */
 export async function sendMail(
   to: string,
