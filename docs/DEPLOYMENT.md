@@ -80,3 +80,11 @@ If you don't run it, trigger that URL from any scheduler (`Authorization: Bearer
 4. Send a support message → it shows in the admin Support list and the bell.
 5. Publish an announcement → it appears in the user's notifications (and the email arrives).
 6. A test coupon applies once per customer.
+
+## Temporary test admin (no MFA)
+
+For first-time testing only. `npm run seed:prod` (reads `.env.vercel`, no shell sourcing) can also create a **test Super Admin** when
+`SEED_TEST_ADMIN_EMAIL` and `SEED_TEST_ADMIN_PASSWORD` are set. It signs in without MFA **only while** the admin project has
+`ALLOW_MFA_EXEMPT=true`, and **only until its expiry** (`SEED_TEST_ADMIN_DAYS`, default 2, maximum 7). After that the account cannot
+sign in at all. Without the switch it behaves like any new admin (MFA setup is required). To finish: invite your real admin in
+Team & roles, delete the test account, remove `ALLOW_MFA_EXEMPT` from Vercel and redeploy.

@@ -27,6 +27,11 @@ export interface Account {
   phone?: string;
   avatar?: string | null;
   accessExpires?: string;
+  /**
+   * Time-boxed test accounts only (created by the seed script, never from the UI): skips the second step while
+   * ALLOW_MFA_EXEMPT=true AND the account has a future `accessExpires` at most 8 days away. See `mfaExemptActive`.
+   */
+  mfaExempt?: boolean;
   lastActive?: string;
   invitedAt?: string;
 }
@@ -102,8 +107,17 @@ export const isAllowedAdminEmail = (email: string) => {
 };
 
 export type LoginResult =
-  | { ok: true; user: SessionUser; needsSetup: boolean }
+  | { ok: true; user: SessionUser; needsSetup: boolean; mfaExempt?: boolean }
   | { ok: false; reason: 'invalid' | 'locked' | 'expired'; retryAfterS?: number };
+
+const MAX_EXEMPT_MS = 8 * 86_400_000;
+/** A test account may skip MFA only while explicitly allowed by the deployment AND inside a short, future access window. */
+export function mfaExemptActive(a: Pick<Account, 'mfaExempt' | 'accessExpires'>, now = Date.now()) {
+  if (process.env.ALLOW_MFA_EXEMPT !== 'true' || a.mfaExempt !== true || !a.accessExpires)
+    return false;
+  const until = new Date(a.accessExpires).getTime();
+  return until > now && until - now <= MAX_EXEMPT_MS;
+}
 
 export async function verifyPassword(email: string, password: string): Promise<LoginResult> {
   const a = await byEmail(email);
@@ -126,7 +140,13 @@ export async function verifyPassword(email: string, password: string): Promise<L
   if (a.accessExpires && new Date(a.accessExpires).getTime() < now)
     return { ok: false, reason: 'expired' };
   if (a.failed) await patch(a.id, { failed: 0 });
-  return { ok: true, user: toUser(a), needsSetup: a.mustChange || !a.mfaEnrolled };
+  const exempt = mfaExemptActive(a, now);
+  return {
+    ok: true,
+    user: toUser(a),
+    needsSetup: exempt ? false : a.mustChange || !a.mfaEnrolled,
+    mfaExempt: exempt,
+  };
 }
 
 // ---- tokens (single use, hashed at rest) ----

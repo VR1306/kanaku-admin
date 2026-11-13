@@ -9,8 +9,21 @@ import { MongoClient } from 'mongodb';
 const uri = process.env.MONGODB_URI;
 if (!uri) throw new Error('MONGODB_URI is not set');
 const demo = process.argv.includes('--demo');
-const client = await new MongoClient(uri).connect();
+const client = await new MongoClient(uri, { serverSelectionTimeoutMS: 15000 })
+  .connect()
+  .catch((e) => {
+    console.error(`\n✖ Could not connect to MongoDB (${e.name}).`);
+    console.error(
+      /auth/i.test(e.message)
+        ? '  The database rejected the login: check the username/password in MONGODB_URI (URL-encode special characters).'
+        : '  In Atlas allow 0.0.0.0/0 under Network Access, make sure the cluster is not paused, and check MONGODB_URI.',
+    );
+    process.exit(1);
+  });
 const db = client.db(process.env.MONGODB_DB ?? 'kanaku_admin');
+console.log(
+  `Seeding database "${db.databaseName}" on ${(uri.match(/@([^/?]+)/) ?? [])[1] ?? 'unknown host'}`,
+);
 const insertOnce = (name, docs) =>
   Promise.all(
     docs.map(({ _id, ...rest }) =>
@@ -52,6 +65,47 @@ if (email && password) {
   } else console.log(`Super Admin ${email} already exists`);
 } else
   console.log('Skipped Super Admin (set SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD to create one)');
+
+// 1b. Optional time-boxed TEST Super Admin that can sign in without MFA (for first-time setup/testing only).
+//     Needs SEED_TEST_ADMIN_EMAIL + SEED_TEST_ADMIN_PASSWORD. It expires by itself after SEED_TEST_ADMIN_DAYS (default 2,
+//     max 7) and only skips MFA while the app has ALLOW_MFA_EXEMPT=true. Delete it from Team & roles once a real admin exists.
+const testEmail = (process.env.SEED_TEST_ADMIN_EMAIL ?? '').toLowerCase();
+const testPassword = process.env.SEED_TEST_ADMIN_PASSWORD;
+if (testEmail && testPassword) {
+  const days = Math.min(7, Math.max(1, Number(process.env.SEED_TEST_ADMIN_DAYS ?? 2) || 2));
+  const until = new Date(Date.now() + days * 86_400_000).toISOString();
+  const existing = await db.collection('admins').findOne({ email: testEmail });
+  if (!existing) {
+    await db.collection('admins').insertOne({
+      _id: 'adm_' + randomBytes(5).toString('hex'),
+      name: 'Test Super Admin',
+      email: testEmail,
+      role: 'super_admin',
+      status: 'active',
+      pw: hashPw(testPassword),
+      mustChange: false,
+      totpSecret: secret(),
+      mfaEnrolled: false,
+      backup: [],
+      failed: 0,
+      lockedUntil: 0,
+      mfaExempt: true,
+      accessExpires: until,
+      lastActive: new Date().toISOString(),
+    });
+    console.log(`Created TEST Super Admin ${testEmail}: no MFA, expires ${until}`);
+  } else {
+    await db
+      .collection('admins')
+      .updateOne(
+        { email: testEmail },
+        { $set: { mfaExempt: true, accessExpires: until, failed: 0, lockedUntil: 0 } },
+      );
+    console.log(
+      `TEST Super Admin ${testEmail} already existed: access window renewed until ${until}`,
+    );
+  }
+}
 
 // 2. Starter plans and default categories (product configuration, editable in the console afterwards).
 const PRO_MONTHLY = 199,
