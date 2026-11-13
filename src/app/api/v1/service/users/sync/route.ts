@@ -33,8 +33,17 @@ export const POST = v1({ service: true }, async (req) => {
   const users = await col<Omit<AppUser, 'id'> & { _id: string }>('app_users');
   const now = new Date().toISOString();
   const email = rest.email.toLowerCase();
-  const clash = await users.findOne({ email, _id: { $ne: userId } }, { projection: { _id: 1 } });
-  if (clash) throw new ApiFault(409, 'email_conflict', 'Another user already has this email');
+  const clash = await users.findOne(
+    { email, _id: { $ne: userId } },
+    { projection: { _id: 1, status: 1 } },
+  );
+  if (clash) {
+    // The admin invited this address from the console (placeholder record, status "invited"); now the person has signed
+    // up, so the real account replaces the placeholder instead of conflicting with it.
+    if (clash.status !== 'invited')
+      throw new ApiFault(409, 'email_conflict', 'Another user already has this email');
+    await users.deleteOne({ _id: clash._id });
+  }
   // Fields the caller didn't send keep their value, or get a default on first insert (never both: Mongo rejects overlap).
   const defaults = {
     joined: (joined ?? now).slice(0, 10),

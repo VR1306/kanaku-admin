@@ -100,9 +100,16 @@ export function UsersView({ caps }: { caps: UserCaps }) {
   }
   async function resend(u: AppUser) {
     try {
-      const r = await api<{ inviteLink: string }>(`/api/users/${u.id}/resend-invite`, { body: {} });
+      const r = await api<{ inviteLink: string; emailed: boolean }>(
+        `/api/users/${u.id}/resend-invite`,
+        { body: {} },
+      );
       navigator.clipboard?.writeText(r.inviteLink).catch(() => {});
-      toast('Invitation resent — link copied');
+      toast(
+        r.emailed
+          ? 'Invitation emailed again'
+          : 'Email could not be sent — signup link copied, send it yourself',
+      );
     } catch (e) {
       toast(e instanceof ApiError ? e.message : 'Failed');
     }

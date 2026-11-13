@@ -48,12 +48,18 @@ export function AddUserModal({
   async function submit() {
     setBusy(true);
     try {
-      const r = await api<{ inviteLink: string }>('/api/users', { body });
+      const r = await api<{ inviteLink: string; emailed: boolean }>('/api/users', { body });
       onClose();
       onDone();
       setErr('');
       setF({ name: '', email: '', phone: '+91 ', plan: 'starter', trial: '0', send: true });
-      toast('User added as Invited — invite link copied');
+      toast(
+        !f.send
+          ? 'User added as Invited — signup link copied'
+          : r.emailed
+            ? 'User added — invitation emailed'
+            : 'User added, but the email could not be sent — signup link copied',
+      );
       navigator.clipboard?.writeText(r.inviteLink).catch(() => {});
     } catch (e) {
       setErr(msg(e));
@@ -67,7 +73,7 @@ export function AddUserModal({
       variant="drawer"
       busy={busy}
       title="Add user"
-      subtitle="Creates an account and emails a single-use invite."
+      subtitle="Adds the person and emails them an invitation to sign up."
       onClose={onClose}
       footer={
         <>
@@ -130,7 +136,7 @@ export function AddUserModal({
       <Checkbox
         checked={f.send}
         onChange={(e) => setF({ ...f, send: e.target.checked })}
-        label="Send invite email now (single-use link, valid 7 days)"
+        label="Email the invitation to sign up now"
       />
       {err && (
         <p role="alert" className="rounded-xl bg-bad-soft px-4 py-3 text-sm text-bad">

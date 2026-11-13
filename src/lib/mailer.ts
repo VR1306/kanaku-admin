@@ -92,6 +92,18 @@ export const sendTeamInvite = (to: string, name: string, link: string) =>
     `Hi ${name}, you've been invited to the Kanaku admin console. Accept (valid 72 hours): ${link}`,
   );
 
+/** Invites an end user (created in the console) to sign up on the User App. */
+export const sendUserInvite = (to: string, name: string, signupUrl: string) =>
+  sendMail(
+    to,
+    "You've been invited to Kanaku",
+    layout(
+      `Welcome to Kanaku, ${name}`,
+      `<p>An account has been set up for you on Kanaku. Create your login with <b>this email address</b> (${esc(to)}), verify it with the code we send you, and you're ready to start tracking your money.</p>${button(signupUrl, 'Create my account')}<p style="font-size:12px;word-break:break-all;color:#64748b">${esc(signupUrl)}</p>`,
+    ),
+    `Hi ${name}, you've been invited to Kanaku. Create your account with this email address (${to}): ${signupUrl}`,
+  );
+
 export const sendResetCode = (to: string, code: string) =>
   sendMail(
     to,
