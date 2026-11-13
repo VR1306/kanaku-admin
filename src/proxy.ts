@@ -10,6 +10,7 @@ const PUBLIC_PREFIXES = [
   '/reset-password',
   '/api/auth',
   '/api/public',
+  '/api/health',
   '/api/v1',
   '/docs',
   '/openapi',
