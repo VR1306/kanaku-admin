@@ -55,8 +55,15 @@ export function useRealtime(
       if (dead || !shared) return;
       const { socket } = shared;
       shared.users++;
+      // The screen already loaded its data before the socket opened, so the FIRST connect needs no refetch: only
+      // a reconnect (when events may have been missed) does. If the socket was already open, every connect is a reconnect.
+      let skipNext = !socket.connected;
       const onConnect = () => {
         setConnected(true);
+        if (skipNext) {
+          skipNext = false;
+          return;
+        }
         ref.current.onResync?.();
       };
       const onDisconnect = () => setConnected(false);

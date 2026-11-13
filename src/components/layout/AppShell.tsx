@@ -83,7 +83,6 @@ export function AppShell({ user, permissions, supportOpen, children }: Props) {
       <header className="flex h-16 items-center justify-between bg-navy px-4 lg:hidden">
         <Logo size={32} admin />
         <div className="flex items-center gap-1">
-          <NotificationBell />
           <button
             type="button"
             aria-label="Open navigation"
@@ -107,7 +106,9 @@ export function AppShell({ user, permissions, supportOpen, children }: Props) {
         </div>
       </header>
 
-      <div className="fixed top-4 right-6 z-30 hidden lg:block">
+      {/* ONE bell for every screen size (it used to be mounted twice, doubling its requests and subscriptions).
+          On phones it sits beside the menu button in the header band; on desktop in the top-right corner. */}
+      <div className="fixed top-3 right-[68px] z-30 lg:top-4 lg:right-6">
         <NotificationBell />
       </div>
 

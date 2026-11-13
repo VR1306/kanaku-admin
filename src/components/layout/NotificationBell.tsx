@@ -73,7 +73,7 @@ export function NotificationBell({ className }: { className?: string }) {
         aria-label={unread ? `Notifications, ${unread} unread` : 'Notifications'}
         aria-expanded={open}
         onClick={() => setOpen(!open)}
-        className="relative grid size-10 place-items-center rounded-control text-on-inverse hover:bg-white/10 lg:bg-surface lg:text-ink lg:shadow-sm lg:hover:bg-canvas"
+        className="relative grid size-10 place-items-center rounded-control bg-surface text-ink shadow-sm hover:bg-canvas"
       >
         <Icon name="bell" size={20} />
         {unread > 0 && (

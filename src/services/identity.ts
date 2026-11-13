@@ -361,10 +361,6 @@ export async function membersWithRole(role: string) {
 export async function setPassword(userId: string, password: string): Promise<boolean> {
   return !!(await patch(userId, { pw: hashPw(password), mustChange: false }));
 }
-export async function setTemporaryPasswordReset(userId: string) {
-  await patch(userId, { mustChange: true });
-  await revokeAll(userId);
-}
 export async function needsMfaSetup(userId: string) {
   return !(await getAccount(userId))?.mfaEnrolled;
 }
@@ -380,11 +376,6 @@ export async function activate(userId: string) {
     { _id: userId, status: 'invited' },
     { $set: { status: 'active', lastActive: new Date().toISOString() } },
   );
-}
-export async function touchActive(userId: string) {
-  await (
-    await admins()
-  ).updateOne({ _id: userId }, { $set: { lastActive: new Date().toISOString() } });
 }
 
 // ---- own profile ----
